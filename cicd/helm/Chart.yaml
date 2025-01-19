@@ -1,0 +1,5 @@
+name: intg-s3
+type: application
+apiVersion: v1.1.16
+version: 1.0.4
+appVersion: 1.0.4

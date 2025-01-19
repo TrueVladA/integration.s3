@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sbiS3.resourceFullname" (list . "env") }}
+  labels:
+    {{- include "sbiS3.labels" . | nindent 4 }}
+data:
+  SERVER_ADDRESS: '0.0.0.0'
+  SERVER_PORT: {{ .Values.sbiS3.service.port | squote }}
+{{- with .Values.env.configMap }}
+  {{- toYaml . | nindent 2}}
+{{- end }}

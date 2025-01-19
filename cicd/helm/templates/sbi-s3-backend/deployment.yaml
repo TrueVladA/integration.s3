@@ -1,0 +1,58 @@
+{{- $service_name := "main" }}
+{{- $env := include "sbiS3.resourceFullname" (list . "env") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sbiS3.resourceFullname" (list . $service_name) }}
+  labels:
+    {{- include "sbiS3.labels" . | nindent 4 }}
+    {{- include "sbiS3.deploymentLabels" (list . $service_name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.sbiS3.deployment.replicaCount | int }}
+  selector:
+    matchLabels:
+      {{- include "sbiS3.deploymentLabels" (list . $service_name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sbiS3.deploymentLabels" (list . $service_name) | nindent 8 }}
+      annotations:
+        helm.sh/deployment-rollme: {{ randAlphaNum 5 | quote }}
+        {{ include "sbiS3.podAnnotations" (list . .Values.sbiS3.deployment.podAnnotations) | nindent 8}}
+    spec:
+      {{- if .Values.sbiS3.deployment.serviceAccount }}
+      serviceAccount: {{ .Values.sbiS3.deployment.serviceAccount | squote }}
+      {{- end }}
+      {{- include "sbiS3.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: {{ include "sbiS3.containerName"  (list . $service_name) }}
+          image: {{ include "sbiS3.image" . }}
+          imagePullPolicy: {{ include "sbiS3.imagePullPolicy" . }}
+          {{- if .Values.env.vault.enabled }}
+          command: ['/bin/bash', '-c']
+          args: 
+            - "set -a && source /vault/secrets/env && set +a && java -jar /app/app-SNAPSHOT.jar"
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ $env }}
+          {{- if .Values.env.secret }}
+            - secretRef:
+                name: {{ $env }}
+          {{- end }}
+          {{- with .Values.sbiS3.deployment.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.sbiS3.deployment.readinessProbe.enabled }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.sbiS3.service.port }}
+            {{- with .Values.sbiS3.deployment.readinessProbe.additionalParams }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- with .Values.sbiS3.deployment.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

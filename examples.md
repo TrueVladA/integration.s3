@@ -1,0 +1,12 @@
+- 8dba1061-ad5a-49df-bdb0-4ee97a52ff60  //example.xlsx
+- c535312c-bd6c-4319-a053-9cee50c82c34    //example.docx
+- bd4bd89a-cb63-41f5-9e72-dcd26890381a    //example.potx
+- f44715fa-e21c-4359-8f44-846657d74eac   //example.potx
+- 7f90a2fe-c400-49b9-a2c6-7f660d4c1399     //example.pdf
+- 5c77d121-47ea-42ff-a798-22b20431c012     //example.png
+- c2b528e5-2dc5-424d-8333-ea36257c0518    //example.djvu
+- 3f4ed9dc-1393-4f7c-9758-a3f289df60d3    //example.csv
+- dd06edc5-abd7-42b1-9a38-b5cd1e63b54b    //example.rtf
+- 60bfc663-ee2f-4146-8238-37c07b92b404    //example.txt
+- 8dba1061-ad5a-49df-bdb0-4ee97a52ff60  //example.xlsx
+- 41aabe35-3cf7-4ccf-8041-b498326a1c11  //example.xltx

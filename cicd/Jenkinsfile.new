@@ -1,0 +1,36 @@
+pipeline {
+    agent {
+        label 'cprd-cicd-app05'
+    }
+    environment {
+	    REGISTRY_URL = 'cprd-doc-reg01.sberins.ru:10010'
+		SERVICE_NAME = 'intg-s3'
+		VERSION = '${TAG}'
+        
+    }
+    stages {
+		stage('Build') {
+            steps {
+				dir('.') {
+				    withCredentials([usernamePassword(credentialsId: "doc-reg-elma", passwordVariable: 'nexus_password', usernameVariable: 'nexus_username')]) {
+                        sh "docker login -u=\"${nexus_username}\" -p=\"${nexus_password}\" https://${env.REGISTRY_URL}/"
+						sh "docker build -f cicd/Dockerfile --no-cache --build-arg Env=${SSLServer} -t ${env.REGISTRY_URL}/${env.SERVICE_NAME}:${env.VERSION} ."
+						sh "echo 'Push to registry'"
+						sh "docker push ${env.REGISTRY_URL}/${env.SERVICE_NAME}:${env.VERSION}"
+                        sh "docker rmi -f ${env.REGISTRY_URL}/${env.SERVICE_NAME}:${env.VERSION}"
+					}
+				}
+            }
+        }
+	
+        stage('Deploy integration module') {
+            steps {
+                withCredentials([kubeconfigFile(credentialsId: env.KUBEID, variable: 'KUBECONFIG')]) {
+                     sh '''
+                      helm upgrade --install ${SERVICE_NAME} cicd/helm --namespace elma365 --wait --timeout 300s -f ./cicd/helm/${VALUE} --set image.name="${REGISTRY_URL}/${SERVICE_NAME}" --set image.tag=${TAG}
+                    '''
+                }
+            }
+        }
+    }
+}

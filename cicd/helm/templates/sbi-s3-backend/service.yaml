@@ -1,0 +1,14 @@
+{{- $service_name := "main" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sbiS3.resourceFullname" (list . $service_name) }}
+  labels:
+    {{- include "sbiS3.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.sbiS3.service.type }}
+  ports:
+    - port: {{ .Values.sbiS3.service.port }}
+      name: tomcat
+  selector:
+    {{- include "sbiS3.selectorAppLabels" (list . $service_name) | nindent 4 }}

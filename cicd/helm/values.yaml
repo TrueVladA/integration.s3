@@ -1,0 +1,55 @@
+## Name override chart values
+nameOverride: {}
+fullnameOverride: {}
+
+## Base app image values
+## Default tag - latest, pullPolicy - IfNotPresent (if variable not exist or empty)
+image:
+  name: '${DOCKER_IMAGE_NAME}'
+  tag: '${DOCKER_IMAGE_TAG}'
+  pullPolicy: Always
+  imagePullSecrets: 
+    - name: 'gitlab-registry-s3'
+
+sbiS3:
+  deployment:
+    replicaCount: 1
+    podAnnotations: {}
+    securityContext: {}
+    serviceAccount: ''
+    readinessProbe:
+      enabled: true
+      additionalParams:
+        initialDelaySeconds: 10
+        periodSeconds: 5
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 200m
+        memory: 512Mi
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+env:
+  configMap:
+    S3_PATH_STYLE: false
+
+  secret:
+    ECM_BEARER: ${ECM_BEARER}
+    S3_ACCESSKEY: '${S3_ACCESSKEY}'
+    S3_ENDPOINT: '${S3_ENDPOINT}'
+    S3_SECRETKEY: ${S3_SECRETKEY}
+    S3_REGION: '${S3_REGION}'
+    ENV: '${ENV}'
+
+  vault:
+    enabled: false
+    role: ''
+    kv:
+      version: 2
+      path: ''
+

@@ -1,0 +1,50 @@
+## Name override chart values
+nameOverride: {}
+fullnameOverride: {}
+
+## Base app image values
+## Default tag - latest, pullPolicy - IfNotPresent (if variable not exist or empty)
+image:
+  name: '${DOCKER_IMAGE_NAME}'
+  tag: '${DOCKER_IMAGE_TAG}'
+  pullPolicy: Always
+  imagePullSecrets: 
+    - name: 'regcred'
+
+sbiS3:
+  deployment:
+    replicaCount: 3
+    podAnnotations: 
+      vault.hashicorp.com/ca-cert: /vault/tls/ca.crt
+      vault.hashicorp.com/tls-secret: vault-tls-ca
+    securityContext: {}
+    serviceAccount: 'sbs-integration'
+    readinessProbe:
+      enabled: true
+      additionalParams:
+        initialDelaySeconds: 10
+        periodSeconds: 5
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 200m
+        memory: 512Mi
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+env:
+  configMap:
+    S3_PATH_STYLE: "${S3_PATH_STYLE}"
+
+  secret: {}
+
+  vault:
+    enabled: true
+    role: 'elma365'
+    kv:
+      version: 2
+      path: 'ecm/intg-s3'
